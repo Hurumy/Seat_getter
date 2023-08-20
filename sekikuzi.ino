@@ -20,11 +20,11 @@
 
 //座席の何列目から何列目までを使うか設定します．どちらも含みます．
 //START_LINE <= END_LINE, 1 <= START_LINE, END_LINE <= MAX_SEATR
-#define START_LINE 1
+#define START_LINE 18
 #define END_LINE 27
 
 //奇数番目の席だけ引きます．0 or 1
-#define USEONLY_ODDSEAT 0
+#define USEONLY_ODDSEAT 1
 
 //ボタン入力を検知するデジタルピン，Randomのシードのノイズ取得に使うアナログピン
 #define INPUT_DPIN 5
@@ -223,6 +223,27 @@ void  sgDebug_PrintArray()
     Serial.println(resultTable[i]);
 }
 
+int sgDebug_CountActualSeatSize()
+{
+  int result = 0;
+  int i = START_LINE - 1;
+
+  while (i < END_LINE)
+  {
+    if (USEONLY_ODDSEAT != 0)
+    {
+      if (cluster_map[i] % 2 == 1)
+        result += (cluster_map[i] / 2) + 1;
+      else
+        result += cluster_map[i] / 2;
+    }
+    else
+        result += cluster_map[i];
+    i ++;
+  }
+  return (result);
+}
+
 void  sgDebug_PrintOutSettings()
 {
   cat.fillBuffer(0);
@@ -231,7 +252,7 @@ void  sgDebug_PrintOutSettings()
   cat.setTextSize(2);
   cat.setTextColor(0);
   cat.setCursor(0, 24);
-  cat.println((char *)"Hello. Setup Complete.");
+  cat.println((char *)"Hiya. Setup Complete.");
   cat.print((char *)"Seed: ");
   itoa(seed, commonbuffer, 10);
   cat.println(commonbuffer);
@@ -244,6 +265,10 @@ void  sgDebug_PrintOutSettings()
   cat.print((char *)"useonly_oddseats: ");
   itoa(USEONLY_ODDSEAT, commonbuffer, 10);
   cat.println(commonbuffer);
+  itoa(sgDebug_CountActualSeatSize(), commonbuffer, 10);
+  cat.print((char *)"Actual number of usable seats: ");
+  cat.println(commonbuffer);
+  cat.println();
   cat.printBuffer();
   cat.feed(100);
 }
