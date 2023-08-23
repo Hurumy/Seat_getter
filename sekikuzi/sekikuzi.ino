@@ -1,8 +1,5 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include <CatGFX.h>
 #include <Arduino.h>
-#include <CatPrinter.h>
 
 //依存について
 //TheNitek氏のCatGFXライブラリを利用します．
@@ -20,11 +17,11 @@
 
 //座席の何列目から何列目までを使うか設定します．どちらも含みます．
 //START_LINE <= END_LINE, 1 <= START_LINE, END_LINE <= MAX_SEATR
-#define START_LINE 18
+#define START_LINE 1
 #define END_LINE 27
 
 //奇数番目の席だけ引きます．0 or 1
-#define USEONLY_ODDSEAT 1
+#define USEONLY_ODDSEAT 0
 
 //ボタン入力を検知するデジタルピン，Randomのシードのノイズ取得に使うアナログピン
 #define INPUT_DPIN 5
