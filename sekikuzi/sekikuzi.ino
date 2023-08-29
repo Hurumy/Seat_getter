@@ -1,3 +1,4 @@
+#include <M5Stack.h>
 #include <CatGFX.h>
 #include <Arduino.h>
 
@@ -17,7 +18,7 @@
 
 //座席の何列目から何列目までを使うか設定します．どちらも含みます．
 //START_LINE <= END_LINE, 1 <= START_LINE, END_LINE <= MAX_SEATR
-#define START_LINE 1
+#define START_LINE 9
 #define END_LINE 27
 
 //奇数番目の席だけ引きます．0 or 1
@@ -29,6 +30,9 @@
 
 //クラスターに存在する座席の列数
 #define MAX_SEATR 27
+
+//一回の印刷あたり書き出す席数
+#define SEATS_PER_PRINT 5
 
 //校舎に存在するすべての座席数(工事か引っ越しか天変地異でもない限り，ほとんどの場合，変更が必要ないはず)
 #define r1 0
@@ -188,7 +192,7 @@ void  sgPrintOutString(char *str)
   cat.setCursor(0, 24);
   cat.println(str);
   cat.printBuffer();
-  cat.feed(60);
+  cat.feed(50);
 }
 
 int sgIsValidSeat(int number)
@@ -267,7 +271,7 @@ void  sgDebug_PrintOutSettings()
   cat.println(commonbuffer);
   cat.println();
   cat.printBuffer();
-  cat.feed(100);
+  cat.feed(90);
 }
 
 
@@ -300,6 +304,7 @@ void setup()
 
   //なんかだす
   sgDebug_PrintArray();
+  Serial.println(temperatureRead(), DEC);
   sgDebug_PrintOutSettings();
   Serial.println((char *)"Setup Completed.");
 }
@@ -313,21 +318,27 @@ void loop()
   is_pushed = digitalRead(INPUT_DPIN);
   if (is_pushed == 1 && i < sum_seats)
   {
-    //条件を満たす座席が出るまでループ
-    while (i < sum_seats)
+    for (int t = 0; t < SEATS_PER_PRINT; t ++)
     {
-      status = sgIsValidSeat(resultTable[i]);
-      if (status == 1)
+      //条件を満たす座席が出るまでループ
+      while (i < sum_seats)
+      {
+        status = sgIsValidSeat(resultTable[i]);
+        if (status == 1)
+          break ;
+        i ++;
+      }
+      //条件満たしてたら印刷
+      if (i < sum_seats && status == 1)
+      {
+        sgPrintOutString(sgGetSeatName(resultTable[i]));
+        Serial.println(temperatureRead(), DEC);
+        i ++;
+      }
+      if (i >= sum_seats)
         break ;
-      i ++;
     }
-    //条件満たしてたら印刷
-    if (i < sum_seats && status == 1)
-    {
-      sgPrintOutString(sgGetSeatName(resultTable[i]));
-      i ++;
-      delay(4000);
-    }
+    delay(3000 * SEATS_PER_PRINT);
   }
   else if (is_pushed == 1 && i >= sum_seats)
   {
